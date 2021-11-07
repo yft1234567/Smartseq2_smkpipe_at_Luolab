@@ -3,7 +3,9 @@ Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries
 
 ## Structure of the Repository
 
-We follow a modified git repository structure snakemake pipelines as recommended by <snakmake docs>[https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html].
+We follow a modified git repository structure snakemake pipelines as recommended by [snakmake docs](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html).
+
+```
 
 ├── .gitignore
 ├── README.md
@@ -36,3 +38,4 @@ We follow a modified git repository structure snakemake pipelines as recommended
 ├── config
 │   ├── config.yaml
 │   └── some-sheet.tsv
+```

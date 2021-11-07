@@ -6,21 +6,21 @@
 
 # validate(config, schema="../schemas/config.schema.yaml")
 
-samples = (
-    pd.read_csv(config["samples"], sep="\t", dtype={"sample_name": str})
-    .set_index("sample_name", drop=False)
-    .sort_index()
-)
+# samples = (
+#     pd.read_csv(config["samples"], sep="\t", dtype={"sample_name": str})
+#     .set_index("sample_name", drop=False)
+#     .sort_index()
+# )
 
 # validate(samples, schema="../schemas/samples.schema.yaml")
 
-def get_final_outputs():
-    # Counting from single batch, omitting down-sampling and saturation test
-    final_outputs = expand(
-        "workflow/data/{sample.user}/{sample.library}/outs/{sample.sample_name}_final_count",
-        sample = samples.itertuples()
-    )
-    return final_outputs
+# def get_final_outputs():
+#     # Counting from single batch, omitting down-sampling and saturation test
+#     final_outputs = expand(
+#         "workflow/data/{sample.user}/{sample.library}/outs/{sample.sample_name}_final_count",
+#         sample = samples.itertuples()
+#     )
+#     return final_outputs
 
 # def get_final_outputs():
 #     if config["saturation_test"]["activate"]:

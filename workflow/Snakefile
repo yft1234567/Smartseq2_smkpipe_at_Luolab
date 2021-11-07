@@ -1,0 +1,12 @@
+USER = ["LinRui"]
+LIBS = ["yt-8-5"]
+SAMPLE = ["yt-8-5"]
+
+configfile: "config/config.yaml"
+
+include: "rules/umi_tools.smk"
+
+rule all:
+    input:
+        expand("workflow/data/{user}/alignment/{library}/{sample}_whitelist_washed.txt",
+                user=USER, library=LIBS, sample=SAMPLE, allow_missing=True)

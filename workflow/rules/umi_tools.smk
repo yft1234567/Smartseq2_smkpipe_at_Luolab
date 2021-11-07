@@ -1,6 +1,7 @@
+# Step 1: Identify cell barcode whitelist (identify correct BC)
 rule umi_tools_whitelist:
     input:
-        read1="workflow/data/{user}/fastqs/{library}/{sample}_R1_001.fastq.gz"
+        read1="workflow/data/{user}/fastqs/{library}/{sample}_sub_R2.fq.gz"
     output:
         "workflow/data/{user}/alignment/{library}/{sample}_whitelist.txt"
     log:
@@ -8,41 +9,76 @@ rule umi_tools_whitelist:
     threads:1
     shell:
         """
-        umi_tools whitelist --bc-pattern='CCCCCCCCNNNNNNNN' \
+        umi_tools whitelist --bc-pattern=CCCCCCCCNNNNNNNN \
                             -L {log} \
                             --stdin {input.read1} \
                             --set-cell-number=100 \
-                            --plot-prefix=workflow/data/zhongshilin/{wildcards.library}/outs/{wildcards.sample} \
+                            --plot-prefix=workflow/data/{wildcards.user}/alignment/{wildcards.library}/{wildcards.sample} \
                             --log2stderr > {output}
         """
 
+# Step 2: Wash whitelist
 rule wash_whitelist:
     input:
-        whitelist="workflow/data/{user}/alignment/{library}/{sample}_whitelist.txt"
-        ground_truth=""
+        whitelist="workflow/data/{user}/alignment/{library}/{sample}_whitelist.txt",
+        ground_truth=config['ground_truth']
     output:
         "workflow/data/{user}/alignment/{library}/{sample}_whitelist_washed.txt"
     threads:1
     script:
-        "scripts/wash_whitelist.py"
+        "../scripts/wash_whitelist.py"
 
+# Step 3: Extract batcodes and UMIs and add to read names
 rule umi_tools_extract:
     input:
-        read1="workflow/data/{user}/fastqs/{library}/{sample}_R1_001.fastq.gz",
-        whitelist="workflow/data/{user}/alignment/{library}/{sample}_whitelist_washed.txt"
+        read1="workflow/data/{user}/fastqs/{library}/{sample}_sub_R2.fq.gz"
+        read2="workflow/data/{user}/fastqs/{library}/{sample}_sub_R1.fq.gz"
+        whitelist_washed="workflow/data/{user}/alignment/{library}/{sample}_whitelist_washed.txt"
     output:
-        "workflow/data/{user}/{library}/fastqs/{sample}_R1_001_extracted.fastq.gz"
+        "workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt"
     log:
-        "workflow/data/{user}/{library}/logs/{sample}_extract.log"
+        "workflow/data/{user}/logs/{library}/{sample}_extract.log"
     threads:1
     shell:
         """
-        umi_tools extract --extract-method=regex \
-                          --bc-pattern='(?P<cell_1>.{{6}})CTTGTGGAAAGGACGAAACA{{s<=2}}(?P<cell_2>.{{6}})(?P<umi_1>.{{15}}).*' \
-                          -L {log} \
+        umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN \
+                          --log={log} \
                           --stdin {input.read1} \
-                          --error-correct-cell \
-                          --filter-cell-barcode \
+                          --read2-in {input.read2} \
                           --stdout {output} \
-                          --whitelist={input.whitelist}
+                          --read2-stdout \
+                          --filter-cell-barcode \
+                          --error-correct-cell \
+                          --whitelist=whitelist_washed
         """
+
+# Step 4: Map reads
+rule STAR:
+    input:
+        extracted_fq="workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt"
+        genomeDir="/mnt/ZA1BT1ER/raywang/ensembl/mus_musculus/STAR_INDEX_GRCm38_102_mScarlet/"
+    output:
+        "workflow/data/{user}/alignment/{library}/{sample}_"
+    log:
+
+    threads:32
+    shell:
+        """
+        STAR --runThreadN 32 \
+             --genomeDir {input.genomeDir} \
+             --readFilesIn {input.extracted_fq} \
+             --readFilesCommand zcat \
+             --outFilterMultimapNmax 1 \
+             --outFilterType BySJout \
+             --outSAMstrandField intronMotif \
+             --outFilterIntronMotifs RemoveNoncanonical \
+             --outFilterMismatchNmax 6 \
+             --outSAMtype BAM SortedByCoordinate \
+             --outFileNamePrefix {output} \
+             --outSAMunmapped Within
+        """
+
+# Step 5: Assign reads to genes (featureCount)
+rule featurecount:
+    input:
+    
