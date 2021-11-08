@@ -49,7 +49,7 @@ rule umi_tools_extract:
                           --read2-stdout \
                           --filter-cell-barcode \
                           --error-correct-cell \
-                          --whitelist=whitelist_washed
+                          --whitelist={input.whitelist_washed}
         """
 
 # # Step 4: Map reads
