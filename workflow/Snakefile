@@ -8,5 +8,5 @@ include: "rules/umi_tools.smk"
 
 rule all:
     input:
-        expand("workflow/data/{user}/alignment/{library}/{sample}_whitelist_washed.txt",
+        expand("workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt",
                 user=USER, library=LIBS, sample=SAMPLE, allow_missing=True)
