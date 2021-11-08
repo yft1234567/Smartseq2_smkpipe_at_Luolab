@@ -52,33 +52,33 @@ rule umi_tools_extract:
                           --whitelist=whitelist_washed
         """
 
-# Step 4: Map reads
-rule STAR:
-    input:
-        extracted_fq="workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt"
-        genomeDir="/mnt/ZA1BT1ER/raywang/ensembl/mus_musculus/STAR_INDEX_GRCm38_102_mScarlet/"
-    output:
-        "workflow/data/{user}/alignment/{library}/{sample}_"
-    log:
+# # Step 4: Map reads
+# rule STAR:
+#     input:
+#         extracted_fq="workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt"
+#         genomeDir="/mnt/ZA1BT1ER/raywang/ensembl/mus_musculus/STAR_INDEX_GRCm38_102_mScarlet/"
+#     output:
+#         "workflow/data/{user}/alignment/{library}/{sample}_"
+#     log:
 
-    threads:32
-    shell:
-        """
-        STAR --runThreadN 32 \
-             --genomeDir {input.genomeDir} \
-             --readFilesIn {input.extracted_fq} \
-             --readFilesCommand zcat \
-             --outFilterMultimapNmax 1 \
-             --outFilterType BySJout \
-             --outSAMstrandField intronMotif \
-             --outFilterIntronMotifs RemoveNoncanonical \
-             --outFilterMismatchNmax 6 \
-             --outSAMtype BAM SortedByCoordinate \
-             --outFileNamePrefix {output} \
-             --outSAMunmapped Within
-        """
+#     threads:32
+#     shell:
+#         """
+#         STAR --runThreadN 32 \
+#              --genomeDir {input.genomeDir} \
+#              --readFilesIn {input.extracted_fq} \
+#              --readFilesCommand zcat \
+#              --outFilterMultimapNmax 1 \
+#              --outFilterType BySJout \
+#              --outSAMstrandField intronMotif \
+#              --outFilterIntronMotifs RemoveNoncanonical \
+#              --outFilterMismatchNmax 6 \
+#              --outSAMtype BAM SortedByCoordinate \
+#              --outFileNamePrefix {output} \
+#              --outSAMunmapped Within
+#         """
 
-# Step 5: Assign reads to genes (featureCount)
-rule featurecount:
-    input:
+# # Step 5: Assign reads to genes (featureCount)
+# rule featurecount:
+#     input:
     
