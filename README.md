@@ -1,5 +1,15 @@
-# Smartseq2_smkpipe_at_Luolab
-Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries (from fastq.gz to expression matrix).
+# Smartseq2 Snakemake Pipeline at Luolab
+Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries - **from fastq.gz to expression matrix (FFEM)**.
+
+## Usage
+
+Edit `sample_table.csv` and `config.yaml` files in the `config/` directory. In terminal, change to main directory of the pipeline (i.e. `Smartseq2_smkpipe_at_Luolab/`), and type
+
+```
+snakemake --cores XX  ## remember to specify cores to be used
+```
+
+Make sure to use the correct genome index, barcode-ground-truth list and gtf annotations. Also make sure to construct the correct file structure under the `data/` directory. For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignment/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems.
 
 ## Structure of the Repository
 
@@ -15,6 +25,7 @@ We follow a modified git repository structure snakemake pipelines as recommended
 |   │   │   ├── Library1
 |   │   │   │   ├── fastqs
 |   │   │   │   ├── alignment
+|   │   │   │   ├── aggr_outs
 |   │   │   │   └── logs
 |   │   │   └── Library2
 |   |   └── User2
