@@ -1,5 +1,5 @@
 # Smartseq2_smkpipe_at_Luolab
-Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries
+Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries (from fastq.gz to expression matrix).
 
 ## Structure of the Repository
 
