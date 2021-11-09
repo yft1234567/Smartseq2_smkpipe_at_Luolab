@@ -1,3 +1,10 @@
-# Path to barcode ground truth list.
+
+# Project info
+user: LinRui
+project: AAV_Microglia
+samples: config/sample_table.csv
+
 ground_truth: config/barcode_ground_truth_checklist_1.csv
 genome_index: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/STAR_INDEX_GRCm38_102_mScarlet
+gtf_annotation: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/gtf/Mus_musculus.GRCm38.102.chr.mScarlet_WPRE.gtf
+thread_use: 32

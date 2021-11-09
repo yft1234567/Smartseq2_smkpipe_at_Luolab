@@ -1,12 +1,9 @@
-USER = ["LinRui"]
-LIBS = ["yt-8-5"]
-SAMPLE = ["yt-8-5"]
-
 configfile: "config/config.yaml"
 
 include: "rules/umi_tools.smk"
 
 rule all:
     input:
-        expand("workflow/data/{user}/alignment/{library}/{sample}_sub_extracted.txt",
-                user=USER, library=LIBS, sample=SAMPLE, allow_missing=True)
+        
+        expand("workflow/data/{user}/{project}/alignment/{sample}/{sample}_counts.tsv.gz",
+                zip, user=samples.User.to_list(), project=samples.Project.to_list(), sample=samples.Sample.to_list())

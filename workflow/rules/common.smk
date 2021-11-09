@@ -1,48 +1,40 @@
+import pandas as pd
 # import glob
 # import os
-
 
 # from snakemake.utils import validate
 
 # validate(config, schema="../schemas/config.schema.yaml")
 
-# samples = (
-#     pd.read_csv(config["samples"], sep="\t", dtype={"sample_name": str})
-#     .set_index("sample_name", drop=False)
-#     .sort_index()
-# )
+samples = (
+    pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Sample': str})
+    .set_index("Sample", drop=False)
+    .sort_index()
+)
 
-# validate(samples, schema="../schemas/samples.schema.yaml")
-
-# def get_final_outputs():
-#     # Counting from single batch, omitting down-sampling and saturation test
-#     final_outputs = expand(
-#         "workflow/data/{sample.user}/{sample.library}/outs/{sample.sample_name}_final_count",
-#         sample = samples.itertuples()
-#     )
-#     return final_outputs
-
-# def get_final_outputs():
-#     if config["saturation_test"]["activate"]:
-#         # Perform down-sampling and count on various levels of sequencing depths (units)
-#         final_outputs = expand(
-#             "workflow/data/{sample.user}/{sample.directory}/outs/{sample.sample_name}_{units}_final_counts",
-#             sample = samples.itertuples(),
-#             units = get_units()
-#         )
-#     else:
-#         # Counting from single batch, omitting down-sampling and saturation test
-#         final_outputs = expand(
-#             "workflow/data/{sample.user}/{sample.directory}/outs/{sample.sample_name}_final_counts",
-#             sample = sample.itertuples()
-#         )
-#     return final_outputs.to_list()
+def parse_suffix(rule):
+    # Given a rule name, return the suffix of its corresponding output file
+    match rule:
+        case 'umi_tools_whitelist':
+            return 'whitelist.txt'
+        case 'wash_whitelist':
+            return 'whitelist_washed.txt'
+        case 'umi_tools_extract':
+            return 'extracted.fq.gz'
+        case 'STAR':
+            return 'Aligned.sortedByCoord.out.bam'
+        case 'featurecount':
+            return 'Aligned.sortedByCoord.out.bam.featureCounts.bam'
+        case 'sambamba_sort':
+            return 'assigned_sorted.bam'
+        case 'umi_tools_count':
+            return 'counts.tsv.gz'
 
 
-# def get_units():
-#     max_unit = config['saturation_test']['max_unit']
-#     step = config['saturation_test']['step']
-#     units = list(range(step, max_unit, step))
-#     units.append(max_unit)
-#     return units
+def get_files(rule):
 
+    files = expand(
+        '_'.join(["workflow/data/{user}/{project}/alignment/{sample}/{sample}_", parse_suffix(rule)])
+        zip, user=samples.User.to_list(), project=samples.Project.to_list(), sample=samples.Sample.to_list()
+        )
+    return files
