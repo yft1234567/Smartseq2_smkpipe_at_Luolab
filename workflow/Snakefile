@@ -1,9 +1,10 @@
 configfile: "config/config.yaml"
 
+include: "rules/common.smk"
 include: "rules/umi_tools.smk"
 
 rule all:
     input:
+    # Final outputs
+        get_files('umi_tools_count')
         
-        expand("workflow/data/{user}/{project}/alignment/{sample}/{sample}_counts.tsv.gz",
-                zip, user=samples.User.to_list(), project=samples.Project.to_list(), sample=samples.Sample.to_list())

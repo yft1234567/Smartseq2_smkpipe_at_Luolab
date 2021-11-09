@@ -1,4 +1,5 @@
 # Custom ignored files
+.snakemake/*
 workflow/data/*
 
 # Byte-compiled / optimized / DLL files

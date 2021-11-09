@@ -1,11 +1,11 @@
 # Step 1: Identify cell barcode whitelist (identify correct BC)
 rule umi_tools_whitelist:
     input:
-        read1="workflow/data/{user}/{project}/fastqs/{sample}/{sample}_R2.fq.gz"
+        read1="workflow/data/{user}/{project}/fastqs/{library}/{sample}_R2.fq.gz"
     output:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_whitelist.txt"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_whitelist.txt"
     log:
-        "workflow/data/{user}/{project}/logs/{sample}/{sample}_whitelist.log"
+        "workflow/data/{user}/{project}/logs/{library}/{sample}_whitelist.log"
     threads:1
     shell:
         """
@@ -20,10 +20,10 @@ rule umi_tools_whitelist:
 # Step 2: Wash whitelist
 rule wash_whitelist:
     input:
-        whitelist="workflow/data/{user}/{project}/alignment/{sample}/{sample}_whitelist.txt",
+        whitelist="workflow/data/{user}/{project}/alignment/{library}/{sample}_whitelist.txt",
         ground_truth=config['ground_truth']
     output:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_whitelist_washed.txt"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_whitelist_washed.txt"
     threads:1
     script:
         "../scripts/wash_whitelist.py"
@@ -31,13 +31,13 @@ rule wash_whitelist:
 # Step 3: Extract barcodes and UMIs and add to read names
 rule umi_tools_extract:
     input:
-        read1="workflow/data/{user}/{project}/fastqs/{sample}/{sample}_R2.fq.gz",
-        read2="workflow/data/{user}/{project}/fastqs/{sample}/{sample}_R1.fq.gz",
-        whitelist_washed="workflow/data/{user}/{project}/alignment/{sample}/{sample}_whitelist_washed.txt"
+        read1="workflow/data/{user}/{project}/fastqs/{library}/{sample}_R2.fq.gz",
+        read2="workflow/data/{user}/{project}/fastqs/{library}/{sample}_R1.fq.gz",
+        whitelist_washed="workflow/data/{user}/{project}/alignment/{library}/{sample}_whitelist_washed.txt"
     output:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_extracted.fq.gz"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_extracted.fq.gz"
     log:
-        "workflow/data/{user}/{project}/logs/{sample}/{sample}_extract.log"
+        "workflow/data/{user}/{project}/logs/{library}/{sample}_extract.log"
     threads:1
     shell:
         """
@@ -55,10 +55,10 @@ rule umi_tools_extract:
 # Step 4: Map reads
 rule STAR:
     input:
-        extracted_fq="workflow/data/{user}/{project}/alignment/{sample}/{sample}_extracted.fq.gz",
+        extracted_fq="workflow/data/{user}/{project}/alignment/{library}/{sample}_extracted.fq.gz",
         genomeDir=directory(config["genome_index"])
     output:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_Aligned.sortedByCoord.out.bam"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam"
     threads:32
     shell:
         """
@@ -82,26 +82,27 @@ rule STAR:
 rule featurecount:
     input:
         gtf=config["gtf_annotation"],
-        bam="workflow/data/{user}/{project}/alignment/{sample}/{sample}_Aligned.sortedByCoord.out.bam"
+        bam="workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam",
+        dummy="workflow/data/{user}/{project}/logs/STARunload_Log.out"
     output:
-        assigned="workflow/data/{user}/{project}/alignment/{sample}/{sample}_gene_assigned",
-        bam_counted=temp("workflow/data/{user}/{project}/alignment/{sample}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam")
+        assigned="workflow/data/{user}/{project}/alignment/{library}/{sample}_gene_assigned",
+        bam_counted=temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam")
     threads:32
     shell:
         """
         featureCounts -s 1 \
                       -a {input.gtf} \
                       -o {output.assigned} \
-                      -R BAM {in# sample: put.bam} \
+                      -R BAM {input.bam} \
                       -T {threads}
         """
 
 # Step 5-2: Assign reads to genes (sort bam files)
 rule sambamba_sort:
     input:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam"
     output:
-        temp("workflow/data/{user}/{project}/alignment/{sample}/{sample}_assigned_sorted.bam")
+        temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_assigned_sorted.bam")
     params:
         extra="-t "+str(config["thread_use"])+" -m 64G"
     threads: 32
@@ -111,9 +112,9 @@ rule sambamba_sort:
 # Step 6: Count UMIs per gene per cell
 rule umi_tools_count:
     input:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_assigned_sorted.bam"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_assigned_sorted.bam"
     output:
-        "workflow/data/{user}/{project}/alignment/{sample}/{sample}_counts.tsv.gz"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_counts.tsv.gz"
     threads:1
     shell:
         """
@@ -127,11 +128,13 @@ rule umi_tools_count:
 # Step final: Unload STAR genome index
 rule STAR_unload:
     input:
-        bams=expand("workflow/data/{user}/{project}/alignment/{sample}/{sample}_Aligned.sortedByCoord.out.bam",
-                   zip, samples.User.to_list(), project=samples.Project.to_list(), sample=samples.Sample.to_list()),
+        bams=get_files("STAR"),
         genomeDir=directory(config["genome_index"])
+    output:
+        "workflow/data/{user}/{project}/logs/STARunload_Log.out"
     shell:
         """
         STAR --genomeLoad Remove \
-             --genomeDir {input.genomeDir}
+             --genomeDir {input.genomeDir} \
+             --outFileNamePrefix workflow/data/{wildcards.user}/{wildcards.project}/logs/STARunload_
         """
