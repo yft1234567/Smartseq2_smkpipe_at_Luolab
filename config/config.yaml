@@ -2,7 +2,7 @@
 # Project info
 user: LinRui
 project: AAV_Microglia
-samples: config/sample_test_table.csv
+samples: config/sample_table.csv
 
 ground_truth: config/barcode_ground_truth_checklist_1.csv
 genome_index: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/STAR_INDEX_GRCm38_102_mScarlet
