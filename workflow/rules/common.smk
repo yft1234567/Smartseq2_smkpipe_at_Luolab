@@ -27,6 +27,8 @@ def parse_suffix(rule):
     elif rule == 'sambamba_sort':
         return 'assigned_sorted.bam'
     elif rule == 'umi_tools_count':
+        return 'counts_raw.tsv.gz'
+    elif rule == "append_suf":
         return 'counts.tsv.gz'
 
 def get_files(rule):
@@ -35,3 +37,7 @@ def get_files(rule):
         zip, user=samples.User.to_list(), project=samples.Project.to_list(), library=samples.Library.to_list(), sample=samples.Sample.to_list()
         )
     return files
+
+def get_aggr_output():
+    # return "workflow/data/LinRui/AAV_Microglia/outs/exp_mat.tsv.gz"
+    return list(set(expand("workflow/data/{user}/{project}/outs/counts_all.tsv.gz", zip, user=samples.User.to_list(), project=samples.Project.to_list())))

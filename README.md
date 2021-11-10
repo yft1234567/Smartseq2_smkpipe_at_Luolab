@@ -1,5 +1,9 @@
 # Smartseq2 Snakemake Pipeline at Luolab
-Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries - **from fastq.gz to expression matrix (FFEM)**.
+Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries - **from fastq.gz to expression matrix**.
+
+## Preparing the Environment
+
+TBD
 
 ## Usage
 
@@ -9,7 +13,9 @@ Edit `sample_table.csv` and `config.yaml` files in the `config/` directory. In t
 snakemake --cores XX  ## remember to specify cores to be used
 ```
 
-Make sure to use the correct genome index, barcode-ground-truth list and gtf annotations. Also make sure to construct the correct file structure under the `data/` directory. For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignment/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems.
+Make sure to use the correct genome index, barcode-ground-truth list and gtf annotations. Also make sure to construct the correct file structure under the `data/` directory. 
+
+For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignment/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems.
 
 ## Structure of the Repository
 
@@ -65,7 +71,7 @@ umi_tools whitelist --bc-pattern=CCCCCCCCNNNNNNNN \
 		    --log2stderr > whitelist.txt
 
 # Step 2: Wash whitelist
-(Impletemded in scripts/wash_whitelist.py) 
+(impletemded in scripts/wash_whitelist.py) 
 
 # Step 3: Extract barcodes and UMIs and add to read names
 umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN \
@@ -78,7 +84,7 @@ umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN \
 		  --error-correct-cell \
 		  --whitelist=whitelist_washed.txt
 
-# Step 4: Map reads
+# Step 4-1: Map reads
 STAR --runThreadN 32 \
      --genomeLoad LoadAndKeep \
      --genomeDir /path/to/genome/index \
@@ -92,6 +98,10 @@ STAR --runThreadN 32 \
      --outSAMtype BAM SortedByCoordinate \
      --outSAMunmapped Within \
      --outFileNamePrefix SAMPLE_
+
+# Step 4-2: Unload STAR genome
+STAR --genomeLoad Remove \
+     --genomeDir /path/to/genome/index
 
 # Step 5-1: Assign reads to genes
 featureCounts -s 1 \
@@ -112,8 +122,11 @@ umi_tools count --per-gene \
 		--stdin=SAMPLE_assigned_sorted.bam \
 		--stdout=SAMPLE_counts.tsv.gz
 
-# Step 7: Unload STAR genome
-STAR --genomeLoad Remove \
-     --genomeDir /path/to/genome/index
+# Step 7: Append suffix to cells
+(implemented by scripts/append_suffix.py)
+
+# Step 8: Aggregate counts
+zcat SAMPLE1_counts.tsv.gz SAMPLE2_counts.tsv.gz ... | gzip > outs/counts_all.tsv.gz
+
 ```
 

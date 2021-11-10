@@ -52,11 +52,11 @@ rule umi_tools_extract:
                           --whitelist={input.whitelist_washed}
         """
 
-# Step 4: Map reads
+# Step 4-1: Map reads
 rule STAR:
     input:
         extracted_fq="workflow/data/{user}/{project}/alignment/{library}/{sample}_extracted.fq.gz",
-        genomeDir=directory(config["genome_index"])
+        genomeDir=config["genome_index"]
     output:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam"
     threads:32
@@ -78,12 +78,26 @@ rule STAR:
              --outFileNamePrefix workflow/data/{wildcards.user}/{wildcards.project}/alignment/{wildcards.library}/{wildcards.sample}_
         """
 
+# Step 4-2: Unload STAR genome index
+rule STAR_unload:
+    input:
+        bams=get_files("STAR"),
+        genomeDir=config["genome_index"]
+    output:
+        touch("workflow/data/{user}/{project}/logs/STARunload.done"),
+    shell:
+        """
+        STAR --genomeLoad Remove \
+             --genomeDir {input.genomeDir} \
+             --outSAMmode None
+        """
+
 # Step 5-1: Assign reads to genes (featureCount)
 rule featurecount:
     input:
         gtf=config["gtf_annotation"],
         bam="workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam",
-        dummy="workflow/data/{user}/{project}/logs/STARunload_Log.out"
+        dummy="workflow/data/{user}/{project}/logs/STARunload.done"
     output:
         assigned="workflow/data/{user}/{project}/alignment/{library}/{sample}_gene_assigned",
         bam_counted=temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam")
@@ -114,7 +128,7 @@ rule umi_tools_count:
     input:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_assigned_sorted.bam"
     output:
-        "workflow/data/{user}/{project}/alignment/{library}/{sample}_counts.tsv.gz"
+        temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_counts_raw.tsv.gz")
     threads:1
     shell:
         """
@@ -125,16 +139,22 @@ rule umi_tools_count:
                         --stdout={output}
         """
 
-# Step final: Unload STAR genome index
-rule STAR_unload:
+# Step 7: Append suffix to cells
+rule append_suf:
     input:
-        bams=get_files("STAR"),
-        genomeDir=directory(config["genome_index"])
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_counts_raw.tsv.gz"
     output:
-        "workflow/data/{user}/{project}/logs/STARunload_Log.out"
+        "workflow/data/{user}/{project}/alignment/{library}/{sample}_counts.tsv.gz"
+    threads:1
+    script:
+        "../scripts/append_suffix.py"
+
+# Step 8: Aggregate counts
+rule aggr_counts:
+    input:
+        get_files("append_suf")
+    output:
+        "workflow/data/{user}/{project}/outs/counts_all.tsv.gz"
+    threads:1
     shell:
-        """
-        STAR --genomeLoad Remove \
-             --genomeDir {input.genomeDir} \
-             --outFileNamePrefix workflow/data/{wildcards.user}/{wildcards.project}/logs/STARunload_
-        """
+        "zcat {input} | gzip > {output}"

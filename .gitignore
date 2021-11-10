@@ -1,4 +1,6 @@
 # Custom ignored files
+Log.out
+Log.progress.out
 .snakemake/*
 workflow/data/*
 
