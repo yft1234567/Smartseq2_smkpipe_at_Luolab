@@ -1,6 +1,8 @@
 # Custom ignored files
 Log.out
 Log.progress.out
+Log.final.out
+SJ.out.tab
 .snakemake/*
 workflow/data/*
 
