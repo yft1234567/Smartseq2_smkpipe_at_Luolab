@@ -105,6 +105,14 @@ umi_tools extract --bc-pattern=CCCCCCCCNNNNNNNN \
 		  --error-correct-cell \
 		  --whitelist=whitelist_washed.txt
 
+# Step 4-0: Generate genome index
+STAR --runThreadN 32 \
+     --runMode genomeGenerate \
+     --genomeDir /path/to/genome/index \
+     --genomeFastaFiles /path/to/genome/fastas \
+     --sjdbGTFfile /path/to/gtf \
+     --sjdbOverhang 149
+
 # Step 4-1: Map reads
 STAR --runThreadN 32 \
      --genomeLoad LoadAndKeep \

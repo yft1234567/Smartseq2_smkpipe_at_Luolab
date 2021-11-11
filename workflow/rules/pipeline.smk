@@ -60,7 +60,7 @@ rule umi_tools_extract:
 rule STAR_gen:
     input:
         genome_fa=config["genome_fa"],
-        gtf=config["gtf_annotation"],
+        gtf=config["gtf_annotation"]
     output:
         directory(config["genome_index"])
     params:
@@ -87,9 +87,9 @@ rule STAR:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam"
     conda:
         "../envs/star.yaml"
-    # STAR sometimes faile due to because of too many open files (due to high thread count)
-    # Lower this value if necessary
     threads:16
+    # STAR sometimes fails because of too many opened files (due to high thread count)
+    # Lower thread here if necessary
     shell:
         """
         STAR --runThreadN {threads} \
@@ -114,7 +114,7 @@ rule STAR_unload:
         bams=get_files("STAR"),
         genomeDir=config["genome_index"]
     output:
-        touch("workflow/data/{user}/{project}/logs/STARunload.done")
+        temp(touch("workflow/data/{user}/{project}/logs/STARunload.done")),
     conda:
         "../envs/star.yaml"
     shell:
@@ -188,7 +188,7 @@ rule append_sfx:
 # Step 8: Aggregate counts
 rule aggr_counts:
     input:
-        get_files("append_suf")
+        get_files("append_sfx")
     output:
         "workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz"
     threads:1

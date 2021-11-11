@@ -28,7 +28,7 @@ def parse_suffix(rule):
         return 'assigned_sorted.bam'
     elif rule == 'umi_tools_count':
         return 'counts_raw.tsv.gz'
-    elif rule == "append_suf":
+    elif rule == "append_sfx":
         return 'counts.tsv.gz'
 
 def get_files(rule):
