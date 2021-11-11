@@ -1,5 +1,5 @@
 # Smartseq2 Snakemake Pipeline at Luolab
-Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries - **from fastq.gz to expression matrix**.
+Snakemake pipeline for Upstream processing of Smartseq2 sequenced libraries - **from fastq.gz to count table**.
 
 ## Preparing the Environment
 

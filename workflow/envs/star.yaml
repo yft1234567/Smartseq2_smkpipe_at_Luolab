@@ -1,0 +1,5 @@
+name: umi_tools
+channels:
+  - bioconda
+dependencies:
+  - star=2.7.9

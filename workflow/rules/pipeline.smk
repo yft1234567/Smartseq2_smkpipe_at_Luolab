@@ -6,6 +6,8 @@ rule umi_tools_whitelist:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_whitelist.txt"
     log:
         "workflow/data/{user}/{project}/logs/{library}/{sample}_whitelist.log"
+    conda:
+        "../envs/umi_tools.yaml"
     threads:1
     shell:
         """
@@ -38,6 +40,8 @@ rule umi_tools_extract:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_extracted.fq.gz"
     log:
         "workflow/data/{user}/{project}/logs/{library}/{sample}_extract.log"
+    conda:
+        "../envs/umi_tools.yaml"
     threads:1
     shell:
         """
@@ -52,6 +56,28 @@ rule umi_tools_extract:
                           --whitelist={input.whitelist_washed}
         """
 
+# Step 4-0: Generate genome index
+rule STAR_gen:
+    input:
+        genome_fa=config["genome_fa"],
+        gtf=config["gtf_annotation"],
+    output:
+        directory(config["genome_index"])
+    params:
+        sjdbOverhang=config["sjdbOverhang"]
+    conda:
+        "../envs/star.yaml"
+    threads:32
+    shell:
+        """
+        STAR --runThreadN {threads} \
+             --runMode genomeGenerate \
+             --genomeDir {output} \
+             --genomeFastaFiles {input.genome_fa} \
+             --sjdbGTFfile {input.gtf} \
+             --sjdbOverhang {params.sjdbOverhang}
+        """
+
 # Step 4-1: Map reads
 rule STAR:
     input:
@@ -59,7 +85,11 @@ rule STAR:
         genomeDir=config["genome_index"]
     output:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam"
-    threads:32
+    conda:
+        "../envs/star.yaml"
+    # STAR sometimes faile due to because of too many open files (due to high thread count)
+    # Lower this value if necessary
+    threads:16
     shell:
         """
         STAR --runThreadN {threads} \
@@ -84,7 +114,9 @@ rule STAR_unload:
         bams=get_files("STAR"),
         genomeDir=config["genome_index"]
     output:
-        touch("workflow/data/{user}/{project}/logs/STARunload.done"),
+        touch("workflow/data/{user}/{project}/logs/STARunload.done")
+    conda:
+        "../envs/star.yaml"
     shell:
         """
         STAR --genomeLoad Remove \
@@ -101,6 +133,8 @@ rule featurecount:
     output:
         assigned="workflow/data/{user}/{project}/alignment/{library}/{sample}_gene_assigned",
         bam_counted=temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam")
+    conda:
+        "../envs/featurecount.yaml"
     threads:32
     shell:
         """
@@ -129,6 +163,8 @@ rule umi_tools_count:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_assigned_sorted.bam"
     output:
         temp("workflow/data/{user}/{project}/alignment/{library}/{sample}_counts_raw.tsv.gz")
+    conda:
+        "../envs/umi_tools.yaml"
     threads:1
     shell:
         """
@@ -140,7 +176,7 @@ rule umi_tools_count:
         """
 
 # Step 7: Append suffix to cells
-rule append_suf:
+rule append_sfx:
     input:
         "workflow/data/{user}/{project}/alignment/{library}/{sample}_counts_raw.tsv.gz"
     output:
@@ -154,7 +190,27 @@ rule aggr_counts:
     input:
         get_files("append_suf")
     output:
-        "workflow/data/{user}/{project}/outs/counts_all.tsv.gz"
+        "workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz"
     threads:1
     shell:
         "zcat {input} | gzip > {output}"
+
+# # Step 9-1: Parse Seurat Object
+# rule parse_seurat:
+#     input:
+#         "workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz"
+#     output:
+#         "workflow/data/{user}/{project}/outs/"+config["project"]+"_seurat.rds"
+#     threads:1
+#     script:
+#         "../scripts/parse_seurat.R"
+
+# # Step 9-2: Parse AnnData Object
+# rule parse_anndata:
+#     input:
+#         "workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz"
+#     output:
+#         "workflow/data/{user}/{project}/outs/"+config["project"]+"_adata.h5ad"
+#     threads:1
+#     script:
+#         "../scripts/parse_anndata.py"
