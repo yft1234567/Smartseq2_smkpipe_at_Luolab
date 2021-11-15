@@ -163,7 +163,7 @@ zcat SAMPLE1_counts.tsv.gz SAMPLE2_counts.tsv.gz ... | gzip > outs/counts_all.ts
 An abstracted workflow is illustrated in the graph below:
 
 <p align="center">
-  <img width="800"  src="https://github.com/RuiyuRayWang/Smartseq2_smkpipe_at_Luolab/rulegraph.svg">
+  <img width="200"  src="https://github.com/RuiyuRayWang/Smartseq2_smkpipe_at_Luolab/blob/main/rulegraph.svg">
 </p>
 
 ## Notes
