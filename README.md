@@ -35,7 +35,7 @@ if you wish an automatic package management.
 
 Make sure to use the correct genome index, barcode-ground-truth list and gtf annotations, as specified in the `config/config.yaml`. Also make sure to construct the correct file structure under the `data/` directory. 
 
-For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignments/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems, as shown in the project structure below.
+For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignments/`), logs (`logs/`), and aggregated final results (`outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems, as shown in the project structure below.
 
 ## Structure of the Repository
 
