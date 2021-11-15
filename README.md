@@ -35,7 +35,7 @@ if you wish an automatic package management.
 
 Make sure to use the correct genome index, barcode-ground-truth list and gtf annotations, as specified in the `config/config.yaml`. Also make sure to construct the correct file structure under the `data/` directory. 
 
-For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignment/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems, as shown in the project structure below.
+For proper file system management, we recommend to put raw fastq files (`fastqs/`), intermediate files (`alignments/`), and aggregated final results (`aggr_outs/`) in dedicated locations in your hardware, and construct symbolic links between your `data/` directory and the file storage systems, as shown in the project structure below.
 
 ## Structure of the Repository
 
@@ -49,12 +49,13 @@ We follow a git repository structure snakemake pipelines as recommended by [snak
 ├── workflow
 |   ├── data
 |   |   ├── User1
-|   │   │   ├── Library1
+|   │   │   ├── Project1
 |   │   │   │   ├── fastqs
-|   │   │   │   ├── alignment
-|   │   │   │   ├── aggr_outs
+|   │   │   │   ├── alignments
+|   │   │   │   ├── outs
+|   │   │   │   ├── misc
 |   │   │   │   └── logs
-|   │   │   └── Library2
+|   │   │   └── Project2
 |   |   └── User2
 │   ├── rules
 |   │   ├── common.smk

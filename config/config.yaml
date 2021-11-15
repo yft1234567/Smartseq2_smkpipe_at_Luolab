@@ -1,16 +1,14 @@
-
 # Project info
-user: LinRui
-project: AAV_Microglia
-samples: workflow/data/LinRui/AAV_Microglia/config/sample_test_table.csv
+user: YanTing
+project: Pituitary
+samples: config/sample_table.csv
 
 genome_fa: 
   - "/mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/genome/Mus_musculus.GRCm38.dna.primary_assembly.fa"
-  - "/mnt/ZA1BT1ER/INDICES/custom/mScarlet_WPRE.fa"
-gtf_annotation: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/gtf/Mus_musculus.GRCm38.102.chr.mScarlet_WPRE.gtf
-genome_index: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/STAR_279_INDEX_GRCm38_102_mScarlet
+gtf_annotation: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/gtf/Mus_musculus.GRCm38.102.chr.gtf
+genome_index: /mnt/ZA1BT1ER/INDICES/ensembl/mus_musculus/STAR_279_INDEX_GRCm38_102
 sjdbOverhang: "149"
 
-ground_truth: config/barcode_ground_truth_checklist_1.csv
+ground_truth: config/barcode_ground_truth_checklist_2.csv
 
-thread_use: 32
+threads: 32

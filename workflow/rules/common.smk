@@ -1,16 +1,23 @@
+import os
 import pandas as pd
 # import glob
-# import os
+
 
 # from snakemake.utils import validate
 
 # validate(config, schema="../schemas/config.schema.yaml")
+## Debug
+import yaml
+with open ('config/config.yaml') as f:
+    config = yaml.safe_load(f)
 
 samples = (
-    pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Sample': str})
+    pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Read1': str, 'Read2': str, 'Sample': str})
     .set_index("Sample", drop=False)
     .sort_index()
 )
+
+samples.Sample.fillna(samples.Library, inplace=True)
 
 def parse_suffix(rule):
     # Given a rule name, return the suffix of its corresponding output file
@@ -33,7 +40,7 @@ def parse_suffix(rule):
 
 def get_files(rule):
     files = expand(
-        '_'.join(["workflow/data/{user}/{project}/alignment/{library}/{sample}", parse_suffix(rule)]),
+        '_'.join(["workflow/data/{user}/{project}/alignments/{library}/{sample}", parse_suffix(rule)]),
         zip, user=samples.User.to_list(), project=samples.Project.to_list(), library=samples.Library.to_list(), sample=samples.Sample.to_list()
         )
     return files

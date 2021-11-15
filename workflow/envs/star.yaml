@@ -1,4 +1,4 @@
-name: umi_tools
+name: star
 channels:
   - bioconda
 dependencies:
