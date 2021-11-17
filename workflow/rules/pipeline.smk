@@ -267,6 +267,7 @@ rule aggr_counts:
         rm Log.final.out Log.out Log.progress.out SJ.out.tab
         """
 
+# # Moved away from upstream pipeline to downstream analyses
 # # Step 9-1: Parse Seurat Object
 # rule parse_seurat:
 #     input:
