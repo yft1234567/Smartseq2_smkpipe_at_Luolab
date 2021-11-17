@@ -7,12 +7,12 @@ import pandas as pd
 
 # validate(config, schema="../schemas/config.schema.yaml")
 ## Debug
-import yaml
-with open ('config/config.yaml') as f:
-    config = yaml.safe_load(f)
+# import yaml
+# with open ('config/config.yaml') as f:
+#     config = yaml.safe_load(f)
 
 samples = (
-    pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Read1': str, 'Read2': str, 'Sample': str})
+    pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Library': str, 'Sample': str})
     .set_index("Sample", drop=False)
     .sort_index()
 )
