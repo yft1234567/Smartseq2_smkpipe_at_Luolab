@@ -46,6 +46,9 @@ def get_files(rule):
     return files
 
 def parse_dynamic_output(rule):
+    # all_out: list of all files supposed to be generated in a given rule
+    # Parse a list of output files. If a file was already produced in past run, remove that file from list.
+    # Used to prevent redundant jobs on later reruns.
     all_out = get_files(rule)
     out_files = []
     for f in all_out: 
