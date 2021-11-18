@@ -7,5 +7,5 @@ rule all:
     input:
     # Final outputs
         # get_files('umi_tools_whitelist'),
-        get_files('append_sfx'),
+        # get_files('append_sfx'),
         get_aggr_output()

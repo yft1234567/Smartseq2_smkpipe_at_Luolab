@@ -100,7 +100,7 @@ rule STAR_load:
         ex=get_files('umi_tools_extract'),
         genomeDir=config["genome_index"]
     output:
-        temp(touch("workflow/data/{user}/{project}/logs/STARload.done"))
+        temp(touch("tmp/STARload.done"))
     conda:
         "../envs/star.yaml"
     threads:
@@ -134,7 +134,7 @@ rule STAR:
     input:
         extracted_fq="workflow/data/{user}/{project}/alignments/{library}/{sample}_extracted.fq.gz",
         genomeDir=config["genome_index"],
-        dummy="workflow/data/{user}/{project}/logs/STARload.done"
+        dummy="tmp/STARload.done"
     output:
         "workflow/data/{user}/{project}/alignments/{library}/{sample}_Aligned.sortedByCoord.out.bam"
     conda:
@@ -165,7 +165,7 @@ rule STAR:
 #     input:
 #         bams=get_files("STAR"),
 #     output:
-#         temp(touch("workflow/data/{user}/{project}/logs/STARunload.done")),
+#         temp(touch("tmp/STARunload.done")),
 #     params:
 #         index=config["genome_index"],
 #         extra="--genomeLoad Remove --outSAMmode None"
@@ -178,7 +178,7 @@ rule STAR_unload:
         bams=get_files("STAR"),
         genomeDir=config["genome_index"]
     output:
-        temp(touch("workflow/data/{user}/{project}/logs/STARunload.done")),
+        temp(touch("tmp/STARunload.done")),
     conda:
         "../envs/star.yaml"
     shell:
@@ -193,7 +193,7 @@ rule featurecount:
     input:
         gtf=config["gtf_annotation"],
         bam="workflow/data/{user}/{project}/alignments/{library}/{sample}_Aligned.sortedByCoord.out.bam",
-        dummy="workflow/data/{user}/{project}/logs/STARunload.done"
+        dummy="tmp/STARunload.done"
     output:
         assigned="workflow/data/{user}/{project}/alignments/{library}/{sample}_gene_assigned",
         bam_counted=temp("workflow/data/{user}/{project}/alignments/{library}/{sample}_Aligned.sortedByCoord.out.bam.featureCounts.bam")
@@ -258,7 +258,7 @@ rule aggr_counts:
     input:
         get_files("append_sfx")
     output:
-        "workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz"
+        "workflow/data/{user}/{project}/outs/{project}_counts_all.tsv.gz"
     threads:
         1
     shell:

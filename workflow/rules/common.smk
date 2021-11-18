@@ -47,4 +47,5 @@ def get_files(rule):
 
 def get_aggr_output():
     # return "workflow/data/LinRui/AAV_Microglia/outs/exp_mat.tsv.gz"
-    return list(set(expand("workflow/data/{user}/{project}/outs/"+config["project"]+"_counts_all.tsv.gz", zip, user=samples.User.to_list(), project=samples.Project.to_list())))
+    return list(set(expand("workflow/data/{user}/{project}/outs/{project}_counts_all.tsv.gz", 
+    zip, user=samples.User.to_list(), project=samples.Project.to_list())))
