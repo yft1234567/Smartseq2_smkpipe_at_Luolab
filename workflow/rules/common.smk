@@ -6,10 +6,10 @@ import pandas as pd
 # from snakemake.utils import validate
 
 # validate(config, schema="../schemas/config.schema.yaml")
-## Debug
-# import yaml
-# with open ('config/config.yaml') as f:
-#     config = yaml.safe_load(f)
+# Debug
+import yaml
+with open ('config/config.yaml') as f:
+    config = yaml.safe_load(f)
 
 samples = (
     pd.read_csv(config["samples"], dtype={'User': str, 'Project': str, 'Library': str, 'Sample': str})
@@ -44,6 +44,14 @@ def get_files(rule):
         zip, user=samples.User.to_list(), project=samples.Project.to_list(), library=samples.Library.to_list(), sample=samples.Sample.to_list()
         )
     return files
+
+def parse_dynamic_output(rule):
+    all_out = get_files(rule)
+    out_files = []
+    for f in all_out: 
+        if not os.path.exists(f):
+            out_files.append(f)
+    return out_files
 
 def get_aggr_output():
     # return "workflow/data/LinRui/AAV_Microglia/outs/exp_mat.tsv.gz"

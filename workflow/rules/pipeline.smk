@@ -175,7 +175,7 @@ rule STAR:
 # Step 4-2: Unload STAR genome index
 rule STAR_unload:
     input:
-        bams=get_files("STAR"),
+        bams=parse_dynamic_output('STAR'),
         genomeDir=config["genome_index"]
     output:
         temp(touch("tmp/STARunload.done")),
@@ -255,7 +255,7 @@ rule append_sfx:
 
 # Step 8: Aggregate counts
 rule aggr_counts:
-    input:
+    params:
         get_files("append_sfx")
     output:
         "workflow/data/{user}/{project}/outs/{project}_counts_all.tsv.gz"
@@ -263,7 +263,7 @@ rule aggr_counts:
         1
     shell:
         """
-        zcat {input} | gzip > {output}
+        zcat {params} | gzip > {output}
         rm Log.final.out Log.out Log.progress.out SJ.out.tab
         """
 
