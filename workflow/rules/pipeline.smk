@@ -186,6 +186,7 @@ rule STAR_unload:
         STAR --genomeLoad Remove \
              --genomeDir {input.genomeDir} \
              --outSAMmode None
+        rm Log.final.out Log.out Log.progress.out SJ.out.tab
         """
 
 # Step 5-1: Assign reads to genes (featureCount)
@@ -255,7 +256,7 @@ rule append_sfx:
 
 # Step 8: Aggregate counts
 rule aggr_counts:
-    params:
+    input:
         get_files("append_sfx")
     output:
         "workflow/data/{user}/{project}/outs/{project}_counts_all.tsv.gz"
@@ -264,7 +265,6 @@ rule aggr_counts:
     shell:
         """
         zcat {params} | gzip > {output}
-        rm Log.final.out Log.out Log.progress.out SJ.out.tab
         """
 
 # # Moved away from upstream pipeline to downstream analyses
