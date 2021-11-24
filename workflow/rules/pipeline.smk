@@ -264,7 +264,7 @@ rule aggr_counts:
         1
     shell:
         """
-        zcat {params} | gzip > {output}
+        zcat {input} | gzip > {output}
         """
 
 # # Moved away from upstream pipeline to downstream analyses
