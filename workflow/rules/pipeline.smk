@@ -1,3 +1,7 @@
+## TODO: Initialize project structure per config.yaml - user/project/etc.
+
+## TODO: FASTQ file quality control & summarize QC statistics
+
 # Step 1: Identify cell barcode whitelist (identify correct BC)
 rule umi_tools_whitelist:
     input:
@@ -188,6 +192,8 @@ rule STAR_unload:
              --outSAMmode None
         rm Log.final.out Log.out Log.progress.out SJ.out.tab
         """
+
+## TODO: STAR mapping summarize statistics
 
 # Step 5-1: Assign reads to genes (featureCount)
 rule featurecount:
